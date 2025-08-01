@@ -9,7 +9,11 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Manager\ManagerController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminRoomController;
+use App\Http\Controllers\Admin\AdminBookingController;
+
+// use App\Http\Controllers\Manager\ManagerController;
 
 // Public Routes
 Route::get('/', function () {
@@ -21,16 +25,21 @@ require __DIR__.'/auth.php';
 
 // Admin Auth Routes
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     });
+});
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::resource('rooms', AdminRoomController::class)->except(['show']);
+        Route::patch('rooms/{room}/toggle', [AdminRoomController::class, 'toggleStatus'])->name('rooms.toggle');
+        Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings');
 
-    // Admin Dashboard - after login
-    Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
-    });
+        // Optional: route approve/reject
+        Route::patch('/bookings/{booking}/approve', [AdminBookingController::class, 'approve'])->name('bookings.approve');
+        Route::patch('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])->name('bookings.reject');
 });
 
 // Fallback

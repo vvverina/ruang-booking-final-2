@@ -39,6 +39,8 @@ class Booking extends Model
         'cancelled_at' => 'datetime'
     ];
 
+    protected $dates = ['booking_date', 'start_time', 'end_time'];
+
     // Relationships
     public function user()
     {
